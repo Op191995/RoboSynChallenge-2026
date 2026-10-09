@@ -160,7 +160,7 @@
     "seed": 1000,
     "num_workers": 8,
     "batch_size": 32,
-    "steps": 60000,
+    "steps": 95000,
     "eval_freq": 0,
     "log_freq": 100,
     "save_checkpoint": true,
