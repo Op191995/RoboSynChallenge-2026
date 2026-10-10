@@ -28,7 +28,7 @@
 | 5 | `items_handover` | `checkpoints/ACT_sim_items_handover` | 15000 | 0% ※ | — |
 | 6 | `drawer_open_place` | `checkpoints/ACT_sim_drawer_open_place` | 15000 | 0% ※ | 29% ▼ |
 | 7 | `mixer_operating` | `checkpoints/ACT_sim_mixer_operating` | 45000 | **88%** | 77% |
-| 8 | `item_assembly` | `checkpoints/ACT_sim_item_assembly` | 90000 | 见 §四 | — |
+| 8 | `item_assembly` | `checkpoints/ACT_sim_item_assembly` | 60000 | 28% | — |
 | 9 | `manipulate_pipette` | `checkpoints/ACT_sim_manipulate_pipette` | 60000 | 44% | — |
 | 10 | `sample_loading` | `checkpoints/ACT_sim_sample_loading` | 15000 | 0% ※ | — |
 
@@ -108,9 +108,18 @@ bash policy/act/eval.sh <task> random checkpoints/ACT_sim_<task> 0 \
 
 ### `item_assembly`
 
-本仓库随附的权重为 **090000 步**。该任务历史自测存在两套口径（20 集快筛 / 50 集正式），
-两者因抽取的场景不同而不可直接比较，故此处不列中间值。
-提交以统一 50 集口径下的分数较高者为准；若 090000 的 50 集结果低于 060000，则回退为 060000。
+本仓库随附的权重为 **060000 步**（50 集正式评估 **28.0%**，13→14/50）。
+
+已训练过的三个检查点在统一口径（`random` / `seed 0` / `max_episodes 50`）下为：
+
+| checkpoint | epoch | 50 集成功率 |
+|---|---|---|
+| 030000 | ~3.0 | 18.0% |
+| **060000（提交版本）** | ~6.0 | **28.0%** |
+| 090000 | ~9.0 | 26.0% |
+
+090000 继续加训后反而由 28.0% 回落至 26.0%，故最终选择 060000。
+该曲线也说明：本任务 3→6 epoch 明显有效，6→9 epoch 已无明显收益。
 
 > 口径纪律：不同 `--max_episodes` 会抽到不同场景集合，跨值比较无效。本提交所有对外
 > 声明均为 `random` 档、`seed 0`、`max_episodes 50`（0% 三项为 20 集定性筛查）。
