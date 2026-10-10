@@ -23,7 +23,7 @@
 |---|---|---|---:|---:|---:|
 | 1 | `table_rearrangement` | `checkpoints/ACT_sim_table_rearrangement` | 50000 | **94%** | 63% |
 | 2 | `click_bell` | `checkpoints/ACT_sim_click_bell` | 50000 | **66%** | 37% |
-| 3 | `water_pouring` | `checkpoints/ACT_sim_water_pouring` | 45000 | 36% | 72% |
+| 3 | `water_pouring` | `checkpoints/ACT_sim_water_pouring` | 80000 | **52%** | 72% |
 | 4 | `handle_basket` | `checkpoints/ACT_sim_handle_basket` | 50000 | 42% | — |
 | 5 | `items_handover` | `checkpoints/ACT_sim_items_handover` | 15000 | 0% ※ | — |
 | 6 | `drawer_open_place` | `checkpoints/ACT_sim_drawer_open_place` | 15000 | 0% ※ | 29% ▼ |
@@ -34,9 +34,19 @@
 
 ※ 20 集定性筛查；▼ 官方该分数的口径见 §四。
 
+> 10 项的平均成功率 **48.8%**（0% 三项按 0 计）。自测口径统一为
+> `random` 档 / `seed 0` / `max_episodes 50`；官方评测使用 held-out 参数，
+> 与自测数值不同属正常。
+
+同一份权重另有一份 HuggingFace 镜像（见 §五），两处内容逐字节一致。
+
 ---
 
 ## 二、统一评测命令
+
+**仓库布局与本赛道官方模板 `RoboSynChallenge` 完全一致**：三个入口文件位于
+`policy/act/` 下，和其官方仓库中的 `policy/act/{eval.sh,deploy_policy.yml,deploy_policy.py}`
+一一对应（官方根目录同样没有这三个文件）。说明见下方"入口文件"。
 
 对上面 10 个 `<task>` 各执行一次：
 
@@ -59,6 +69,19 @@ bash policy/act/eval.sh <task> random checkpoints/ACT_sim_<task> 0 \
 评测结果（含三相机拼接录像）输出到
 `<repo root>/eval_result/<task>/act/random/.../<model>/<timestamp>/videos/`，
 文件名带 `_success` / `_fail` 后缀，可直接逐集核查。
+
+### 入口文件（官方 checklist 要求的三项）
+
+| 官方要求 | 本仓库路径 | 备注 |
+|---|---|---|
+| `eval.sh` | `policy/act/eval.sh` | 用法见上文；脚本自身可干任何目录运行，内部会 `cd` 到仓库根 |
+| `deploy_policy.yml` | `policy/act/deploy_policy.yml` | 评测配置，含 `act_step: 50`（见 §三） |
+| `deploy_policy.py` | `policy/act/deploy_policy.py` | policy adapter 实现 |
+
+> **不要把这三类文件复制到仓库根目录**：`eval.sh` 用
+> `REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"` 反推根目录，
+> 挪到根目录会让 `REPO_ROOT` 指向仓库的**父目录**、`VENV_DIR` 也失效，直接跑崩。
+> 本仓库保持了与官方模板相同的目录结构，直接照官方方式调用即可。
 
 ---
 
@@ -126,8 +149,11 @@ bash policy/act/eval.sh <task> random checkpoints/ACT_sim_<task> 0 \
 
 ### 训练量观察
 
-- **加训有效的任务**：mixer_operating（48%→88%）、water_pouring（16%→36%）、
-  item_assembly（18%→28%）、manipulate_pipette（30%→44%）
+- **加训有效的任务**：mixer_operating（48%→88%）、water_pouring（15k/2.3ep 16%
+  → 45k/6.9ep 36% → **80k/13.7ep 52%**）、item_assembly（18%→28%，再往上 9 epoch 回落至 26%）、
+  manipulate_pipette（30%→44%）
+- water_pouring 是本任务里训练量收益最显著的一项：**每翻倍训练步数约 +16 点**，
+  且截至 80k 步（13.7 epoch）仍未出现过拟合拐点
 - **加训无效的任务**：handle_basket 在 15k→50k 加训后成功率与平均动作步数均几乎不变
   （42% → 42%），瓶颈在演示数据的夹取位姿而非训练量
 - click_bell 在 21.6 epoch 已明显过拟合（10k 64% → 50k 66%，仅 +2 点）
