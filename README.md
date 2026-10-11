@@ -1,5 +1,9 @@
 # RoboSynChallenge 初赛提交 · ACT Policy
 
+> **评测方：如需在全新 RTX 5090 环境从零复现，请直接看 [`REPRODUCE.md`](REPRODUCE.md)**
+> —— 包含完整的环境安装、权重获取与校验、10 个任务的逐条测评命令。
+> 本方案**不使用 Ollama、不启动任何服务、评测全程离线**。
+
 基于 **ACT（Action Chunking with Transformers）** 策略，在官方 `cobotmagic_Sim_*` 仿真数据集上
 训练 LeRobot v0.3.3 模型，覆盖全部 **10 个操作任务**。
 
@@ -109,9 +113,9 @@ bash policy/act/eval.sh <task> random checkpoints/ACT_sim_<task> 0 \
 | table_rearrangement | 94% | 63% | 14% |
 | mixer_operating | 88% | 77% | 66% |
 | click_bell | 66% | 37% | 51% |
-| water_pouring | 36% | 72% | 36% |
+| water_pouring | 52% | 72% | 36% |
 | drawer_open_place | 0% | 29% ▼ | 0% |
-| **宏平均** | **56.8%** | **55.6%** | 33.4% |
+| **宏平均** | **60.0%** | **55.6%** | 33.4% |
 
 ### ▼ `drawer_open_place` 的口径说明（避免误判）
 
