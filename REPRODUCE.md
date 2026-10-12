@@ -125,6 +125,15 @@ python -c "import robosynchallenge; print(robosynchallenge.__version__)"
 两条路，**任选其一**，内容逐字节一致（已用 sha256 双向校验：GitHub git-lfs 指针 oid
 与 HF `lfs.sha256` 对全部 10 个文件完全一致）。
 
+> ⚠️ **请勿用 GitHub 网页的 "Download ZIP" 获取权重。** GitHub 的 archive 对 Git LFS
+> 文件返回的是 **134 字节的指针文本**（内容形如 `version https://git-lfs.github.com/spec/v1`
+> + `oid sha256:...`），不是真实权重 —— 加载会直接报错。
+> 请用下面的方式 A（`git clone` + `git lfs pull`）或方式 B（HuggingFace 镜像，
+> 那里的文件是真实权重，无需 LFS）。
+
+**判断有没有拿错的硬指标**：`model.safetensors` 必须是 **206,563,032 字节**。
+若是 134 字节（或任何远小于 200 MB 的值），就是指针文件，见 §9 排错。
+
 ### 方式 A · 直接用仓库内权重（推荐给已 clone 的评测机）
 
 仓库内已有 `checkpoints/ACT_sim_<task>/`，但走 Git LFS，**clone 后必须 pull**：
